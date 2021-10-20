@@ -10,17 +10,19 @@ import Data.Ratio ((%))
 import XMonad.Hooks.FloatNext
 import XMonad.Hooks.ManageHelpers
 import XMonad.Layout.Renamed
+import XMonad.Layout.IndependentScreens
 import qualified XMonad.StackSet as W
 import qualified Data.Map as M
+import XMonad.Layout.Fullscreen
 
 
 spawnToWorkspace :: String -> String -> X ()
 spawnToWorkspace program workspace = do
-    spawn program     
+    spawn program
     windows $ W.greedyView workspace
 
 myModMask = mod4Mask
-myTesminal = "sakura"
+myTesminal = "st"
 
 myFocusFollowsMouse::Bool
 myFocusFollowsMouse=True
@@ -28,33 +30,18 @@ myFocusFollowsMouse=True
 myBorderWidth = 0
 
 myStartupHook = do
+    sScreens <- countScreens
     spawn "/usr/bin/xsetroot -cursor_name left_ptr"
-    spawn "feh --bg-scale /home/erthalion/Images/background.jpg"
-    spawnToWorkspace "conky &" "4:system"
-    {-spawnToWorkspace "sakura -h -e 'tail -f /var/log/messages' &" "4:system"-}
-    spawnToWorkspace "sakura &" "4:system"
+    spawnToWorkspace "st &" "4:system"
 
 myWorkspaces = ["1:main","2:coding","3:web","4:system","5:im","6:media"]
 
 myLogHook = fadeInactiveLogHook 0.7
 
-myTrayer="trayer --edge top --align right --SetDockType true --expand true --width 15 --height 12 --transparent true --tint 0x000000"
-
-myXxkbBar = "xxkb"
-
-myXcompmgr = "xcompmgr -c"
-
-myHdParm = "/bin/bash /home/erthalion/bash/hdparm.sh"
-
-myXFlux="xflux -l 55.1959 -g 86.0449"
-
-cbattery = "cbatticon -u 60 -i symbolic -r 10 -c 'notify-send \"Battery status\" \"Critical battery level\" -i dialog-warning'"
-
 myManageHook = composeAll [
     resource =? "XXkb" --> doIgnore,
-    resource =? "gnome-terminal" --> doFloatAt 0.0 0.71,
-    className =? "Pidgin" --> doShift "5:im",
-    className =? "Chromium-browser" --> doShift "3:web",
+    resource =? "xmobar" --> doIgnore,
+    className =? "chromium-browser" --> doShift "3:web",
     className =? "dwb" --> doShift "3:web"
     ]
 
@@ -95,23 +82,14 @@ defaults = defaultConfig {
     logHook = myLogHook,
     mouseBindings = myMouseBinding
     } `additionalKeys`
-    [((mod4Mask, xK_g), spawn "chromium-browser"),
-    ((mod4Mask, xK_e), spawn "exec ck-launch-session dbus-launch pcmanfm"),
-    {-((mod4Mask, xK_n), spawn "wicd-client -n"),-}
-    ((mod4Mask, xK_n), spawn "touch ~/.pomodoro_session"),
-    ((mod4Mask .|. shiftMask, xK_n), spawn "rm ~/.pomodoro_session"),
-    ((mod4Mask, xK_t), spawn "sakura"),
-    ((mod1Mask, xK_t), spawn "gnome-terminal --geometry=128x10 --hide-menubar -x sh -c \"clear; /home/erthalion/bash/color_ghci.sh\""),
-    ((mod4Mask, xK_q), spawn "shutdown -P now"),
-    ((mod4Mask, xK_p), spawn "/home/erthalion/bash/rundmenu.sh"),
+    [((mod4Mask, xK_g), spawn "chromium"),
+    ((mod4Mask, xK_t), spawn "st"),
+    ((mod4Mask, xK_l), spawn "vlock -na"),
+    ((mod4Mask, xK_p), spawn "/home/ddolgov/bash/rundmenu.sh"),
     ((mod4Mask, xK_Print), spawn "scrot screen_%Y-%m-%d.png -d 1"), -- take screenshot
     ((mod4Mask, xK_F4), kill)
    ]
 
 main = do
-    spawn myTrayer
-    spawn myXxkbBar
-    spawn myXcompmgr
-    spawn myXFlux
-    spawn cbattery
+    --spawn myXxkbBar
     xmonad =<< xmobar defaults
